@@ -1,27 +1,24 @@
 package com.example.fetchtakehomechallenge.ui.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.fetchtakehomechallenge.data.Item
 import androidx.lifecycle.viewModelScope
+import com.example.fetchtakehomechallenge.data.ItemsUiState
 import com.example.fetchtakehomechallenge.network.RetrofitClient
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
-    private val _itemsLiveData = MutableLiveData<Map<Int, List<Item>>>()
-    val itemsLiveData: LiveData<Map<Int, List<Item>>> = _itemsLiveData
+    private val _uiState = mutableStateOf(ItemsUiState())
+    val uiState: State<ItemsUiState> = _uiState
 
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
-
-    private val _error = MutableLiveData<String?>()
-    val error: LiveData<String?> = _error
+    init {
+        fetchItems()
+    }
 
     fun fetchItems() {
         viewModelScope.launch {
-            _isLoading.value = true
-            _error.value = null
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
                 val items = RetrofitClient.apiService.getItems()
 
@@ -34,11 +31,17 @@ class MainViewModel : ViewModel() {
                         items.sortedBy { it.name }
                     }
 
-                _itemsLiveData.value = groupedItems
+                _uiState.value = ItemsUiState(
+                    groupedItems = groupedItems,
+                    isLoading = false,
+                    error = null
+                )
             }   catch (e: Exception) {
-                _error.value = "Error fetching data: ${e.message}"
-            } finally {
-                _isLoading.value = false
+                _uiState.value = ItemsUiState(
+                    groupedItems = emptyMap(),
+                    isLoading = false,
+                    error = "Error fetching data: ${e.message}"
+                )
             }
         }
     }
