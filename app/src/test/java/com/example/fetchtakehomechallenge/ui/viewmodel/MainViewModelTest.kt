@@ -1,23 +1,46 @@
 package com.example.fetchtakehomechallenge.ui.viewmodel
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.fetchtakehomechallenge.data.Item
 import com.example.fetchtakehomechallenge.network.ApiService
+import com.example.fetchtakehomechallenge.repository.ItemRepository
+import com.example.fetchtakehomechallenge.repository.ItemRepositoryImpl
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertNull
+import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.yield
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.whenever
+import java.io.IOException
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class MainViewModelTest {
+    @Mock
+    private lateinit var repository: ItemRepository
+
     @get:Rule
     val testCoroutineRule = TestCoroutineRule()
 
@@ -42,6 +65,67 @@ class MainViewModelTest {
         )
 
         whenever(apiService.getItems()).thenReturn(mockItems)
+        viewModel.fetchItems()
+        advanceUntilIdle()
+        val uiState = viewModel.uiState.value
+
+        assertFalse(uiState.isLoading)
+        assertNull(uiState.error)
+
+        val expectedGroupedItems = mapOf(
+            1 to listOf(
+                Item(1, 1, "Item A"),
+                Item(2, 1, "Item B")
+            ),
+            2 to listOf(
+                Item(5, 2, "Item C"),
+                Item(6, 2, "Item D")
+            )
+        )
+
+        assertEquals(expectedGroupedItems, uiState.groupedItems)
+    }
+
+    @Test
+    fun `fetchItems shows error when API call fails`() = runTest {
+        val errorMessage = "Network error"
+
+        whenever(apiService.getItems()).thenThrow(RuntimeException(errorMessage))
+        viewModel.fetchItems()
+        advanceUntilIdle()
+        val uiState = viewModel.uiState.value
+
+        assertFalse(uiState.isLoading)
+        assertTrue(uiState.error?.contains(errorMessage) == true)
+        assertEquals(emptyMap<Int, List<Item>>(), uiState.groupedItems)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `fetchItems shows loading state during API call`() = runTest {
+        doAnswer {
+            runBlocking {
+                delay(100)
+                emptyList<Item>()
+            }
+        }.`when`(repository).getItems()
+
+//        val mockItems = emptyList<Item>()
+//        doAnswer {
+//            runBlocking { delay(1000) }
+//            mockItems
+//        }.`when`(apiService).getItems()
+//
+//        val job = launch {
+//            viewModel.fetchItems()
+//        }
+//
+//        yield()
+//        assertTrue("Loading should be true during API call", viewModel.uiState.value.isLoading)
+//        advanceTimeBy(1500)
+//        advanceUntilIdle()
+//        assertFalse("Loading should be false after API call completes", viewModel.uiState.value.isLoading)
+//        job.cancel()
     }
 }
 
