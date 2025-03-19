@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    kotlin("kapt")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -94,4 +96,10 @@ dependencies {
     testImplementation("androidx.compose.ui:ui-test-junit4:1.5.4")
     testImplementation("androidx.compose.ui:ui-test-manifest:1.5.4")
     testImplementation("org.robolectric:robolectric:4.10.3")
+
+    //hilt
+    implementation("com.google.dagger:hilt-android:2.48")
+    kapt("com.google.dagger:hilt-android-compiler:2.48")
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.48")
+    kaptAndroidTest("com.google.dagger:hilt-android-compiler:2.48")
 }

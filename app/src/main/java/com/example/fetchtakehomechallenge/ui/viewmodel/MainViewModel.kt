@@ -9,10 +9,13 @@ import com.example.fetchtakehomechallenge.network.RetrofitClient
 import com.example.fetchtakehomechallenge.network.RetrofitClient.apiService
 import com.example.fetchtakehomechallenge.repository.ItemRepository
 import com.example.fetchtakehomechallenge.repository.ItemRepositoryImpl
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel(
-    private val repository: ItemRepository = ItemRepositoryImpl(RetrofitClient.apiService)
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val repository: ItemRepository
 ) : ViewModel() {
     private val _uiState = mutableStateOf(ItemsUiState())
     val uiState: State<ItemsUiState> = _uiState
