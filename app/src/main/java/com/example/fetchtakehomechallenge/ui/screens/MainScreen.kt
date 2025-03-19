@@ -20,89 +20,106 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.fetchtakehomechallenge.data.Item
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.fetchtakehomechallenge.ui.viewmodel.MainViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(viewModel: MainViewModel = viewModel()) {
     val uiState by viewModel.uiState
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        when {
-            uiState.isLoading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-            uiState.error != null -> {
-                Text(
-                    text = "No items found",
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(16.dp)
-                )
-            }
-            else -> {
-                ItemList(
-                    groupedItems = uiState.groupedItems,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-        }
-    }
-}
+    val swipeRefreshState = rememberSwipeRefreshState(
+        isRefreshing = uiState.isLoading
+    )
 
-@Composable
-fun ItemList(
-    groupedItems: Map<Int, List<Item>>,
-    modifier: Modifier = Modifier
-) {
-    LazyColumn(modifier = Modifier) {
-        groupedItems.forEach { (listId, items) ->
-            item {
-                GroupHeader(listId = listId)
-            }
-
-            items(items) { item ->
-                ItemRow(item = item)
-            }
-
-            item {
-               Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
-    }
-}
-
-@Composable
-fun GroupHeader(listId: Int) {
-    Surface(
-        color = MaterialTheme.colorScheme.primaryContainer,
-        modifier = Modifier.fillMaxWidth()
+    SwipeRefresh(
+        state = swipeRefreshState,
+        onRefresh = { viewModel.fetchItems() }
     ) {
-        Text(
-            text = "List ID: $listId",
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(16.dp)
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            when {
+                uiState.isLoading && uiState.groupedItems.isEmpty() -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                uiState.error != null -> {
+                    Text(
+                        text = "No items found",
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(16.dp)
+                    )
+                }
+                else -> {
+                    ItemList(
+                        groupedItems = uiState.groupedItems,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+        }
+    }
+}
+
+    @Composable
+    fun ItemList(
+        groupedItems: Map<Int, List<Item>>,
+        modifier: Modifier = Modifier
+    ) {
+        LazyColumn(modifier = modifier) {
+            groupedItems.forEach { (listId, items) ->
+                item {
+                    GroupHeader(listId = listId)
+                }
+
+                items(items) { item ->
+                    ItemRow(item = item)
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun GroupHeader(listId: Int) {
+        Surface(
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "List ID: $listId",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(16.dp)
             )
 
-    }
-}
-
-@Composable
-fun ItemRow(item: Item) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Text(text = "ID: ${item.id}")
-            Text(text = "Name: ${item.name}")
         }
     }
-}
+
+    @Composable
+    fun ItemRow(item: Item) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Text(text = "ID: ${item.id}")
+                Text(text = "Name: ${item.name}")
+            }
+        }
+    }
+
+

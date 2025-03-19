@@ -109,23 +109,6 @@ class MainViewModelTest {
                 emptyList<Item>()
             }
         }.`when`(repository).getItems()
-
-//        val mockItems = emptyList<Item>()
-//        doAnswer {
-//            runBlocking { delay(1000) }
-//            mockItems
-//        }.`when`(apiService).getItems()
-//
-//        val job = launch {
-//            viewModel.fetchItems()
-//        }
-//
-//        yield()
-//        assertTrue("Loading should be true during API call", viewModel.uiState.value.isLoading)
-//        advanceTimeBy(1500)
-//        advanceUntilIdle()
-//        assertFalse("Loading should be false after API call completes", viewModel.uiState.value.isLoading)
-//        job.cancel()
     }
 }
 

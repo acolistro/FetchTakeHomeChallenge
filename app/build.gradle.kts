@@ -81,6 +81,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata.ktx)
     //RecyclerView
     implementation(libs.androidx.recyclerview)
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.30.1")
     //testing
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:5.3.1")
@@ -88,4 +89,9 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation("androidx.arch.core:core-testing:2.2.0")
     testImplementation("app.cash.turbine:turbine:1.0.0")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.5.4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.5.4")
+    testImplementation("androidx.compose.ui:ui-test-junit4:1.5.4")
+    testImplementation("androidx.compose.ui:ui-test-manifest:1.5.4")
+    testImplementation("org.robolectric:robolectric:4.10.3")
 }
