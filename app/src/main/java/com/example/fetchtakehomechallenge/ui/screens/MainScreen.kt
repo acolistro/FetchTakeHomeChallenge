@@ -21,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.fetchtakehomechallenge.data.Item
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
@@ -44,20 +43,22 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
     SwipeRefresh(
         state = swipeRefreshState,
         onRefresh = { viewModel.fetchItems() },
-        modifier = Modifier.semantics { contentDescription = "Swipe down to refresh items list"
-        customActions = listOf(
-            CustomAccessibilityAction(
-                label = "Refresh items list",
-                action = {
-                    viewModel.fetchItems()
-                    true
-                }
+        modifier = Modifier.semantics {
+            contentDescription = "Swipe down to refresh items list"
+            customActions = listOf(
+                CustomAccessibilityAction(
+                    label = "Refresh items list",
+                    action = {
+                        viewModel.fetchItems()
+                        true
+                    }
+                )
             )
-        )
         }
     ) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .testTag("mainBoxContainer")
         ) {
             when {
@@ -70,6 +71,7 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
                             }
                     )
                 }
+
                 uiState.error != null -> {
                     Text(
                         text = "No items found",
@@ -81,6 +83,7 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
                             }
                     )
                 }
+
                 else -> {
                     ItemList(
                         groupedItems = uiState.groupedItems,
@@ -92,69 +95,69 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
     }
 }
 
-    @Composable
-    fun ItemList(
-        groupedItems: Map<Int, List<Item>>,
-        modifier: Modifier = Modifier
-    ) {
-        LazyColumn(modifier = modifier) {
-            groupedItems.forEach { (listId, items) ->
-                item {
-                    GroupHeader(listId = listId)
-                }
+@Composable
+fun ItemList(
+    groupedItems: Map<Int, List<Item>>,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(modifier = modifier) {
+        groupedItems.forEach { (listId, items) ->
+            item {
+                GroupHeader(listId = listId)
+            }
 
-                items(items) { item ->
-                    ItemRow(item = item)
-                }
+            items(items) { item ->
+                ItemRow(item = item)
+            }
 
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
+}
 
-    @Composable
-    fun GroupHeader(listId: Int) {
-        Surface(
-            color = MaterialTheme.colorScheme.primaryContainer,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = "List ID: $listId",
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .semantics {
-                        heading()
-                        contentDescription = "List group $listId"
-                    }
-            )
-        }
+@Composable
+fun GroupHeader(listId: Int) {
+    Surface(
+        color = MaterialTheme.colorScheme.primaryContainer,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = "List ID: $listId",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .padding(16.dp)
+                .semantics {
+                    heading()
+                    contentDescription = "List group $listId"
+                }
+        )
     }
+}
 
-    @Composable
-    fun ItemRow(item: Item) {
-        Surface(
+@Composable
+fun ItemRow(item: Item) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .height(56.dp)
+            .focusable()
+            .semantics {
+                contentDescription = "Item ${item.id} with name ${item.name}"
+            }
+    ) {
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp)
-                .height(56.dp)
-                .focusable()
-                .semantics {
-                    contentDescription = "Item ${item.id} with name ${item.name}"
-                }
+                .padding(8.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                Text(
-                    text = "ID: ${item.id}",
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                Text(text = "Name: ${item.name}")
-            }
+            Text(
+                text = "ID: ${item.id}",
+                modifier = Modifier.padding(end = 8.dp)
+            )
+            Text(text = "Name: ${item.name}")
         }
     }
+}

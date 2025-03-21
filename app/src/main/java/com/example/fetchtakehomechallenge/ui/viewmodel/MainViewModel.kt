@@ -5,10 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fetchtakehomechallenge.data.ItemsUiState
-import com.example.fetchtakehomechallenge.network.RetrofitClient
-import com.example.fetchtakehomechallenge.network.RetrofitClient.apiService
 import com.example.fetchtakehomechallenge.repository.ItemRepository
-import com.example.fetchtakehomechallenge.repository.ItemRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
