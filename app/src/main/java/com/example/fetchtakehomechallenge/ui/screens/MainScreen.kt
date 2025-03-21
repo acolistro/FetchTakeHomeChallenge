@@ -1,5 +1,6 @@
 package com.example.fetchtakehomechallenge.ui.screens
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +23,10 @@ import com.example.fetchtakehomechallenge.data.Item
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import com.example.fetchtakehomechallenge.ui.viewmodel.MainViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -40,7 +44,17 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
     SwipeRefresh(
         state = swipeRefreshState,
         onRefresh = { viewModel.fetchItems() },
-        modifier = Modifier.semantics { contentDescription = "Swipe to refresh" }
+        modifier = Modifier.semantics { contentDescription = "Swipe down to refresh items list"
+        customActions = listOf(
+            CustomAccessibilityAction(
+                label = "Refresh items list",
+                action = {
+                    viewModel.fetchItems()
+                    true
+                }
+            )
+        )
+        }
     ) {
         Box(
             modifier = Modifier.fillMaxSize()
@@ -49,7 +63,11 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
             when {
                 uiState.isLoading && uiState.groupedItems.isEmpty() -> {
                     CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .semantics {
+                                contentDescription = "Loading items"
+                            }
                     )
                 }
                 uiState.error != null -> {
@@ -58,6 +76,9 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
                         modifier = Modifier
                             .align(Alignment.Center)
                             .padding(16.dp)
+                            .semantics {
+                                contentDescription = "Error: ${uiState.error ?: "No items found"}"
+                            }
                     )
                 }
                 else -> {
@@ -102,9 +123,13 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
             Text(
                 text = "List ID: $listId",
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier
+                    .padding(16.dp)
+                    .semantics {
+                        heading()
+                        contentDescription = "List group $listId"
+                    }
             )
-
         }
     }
 
@@ -114,13 +139,21 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 4.dp)
+                .height(56.dp)
+                .focusable()
+                .semantics {
+                    contentDescription = "Item ${item.id} with name ${item.name}"
+                }
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                Text(text = "ID: ${item.id}")
+                Text(
+                    text = "ID: ${item.id}",
+                    modifier = Modifier.padding(end = 8.dp)
+                )
                 Text(text = "Name: ${item.name}")
             }
         }

@@ -53,6 +53,6 @@ class MainActivityTest {
     @Test
     fun activity_displays_theme_and_surfaces() {
         composeRule.waitForIdle()
-        composeRule.onNodeWithContentDescription("Swipe to refresh").assertExists()
+        composeRule.onNodeWithContentDescription("Swipe down to refresh items list").assertExists()
     }
 }
