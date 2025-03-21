@@ -50,7 +50,8 @@ class MainViewModelTest {
     @Before
     fun setUp() {
         apiService = mock(ApiService::class.java)
-        viewModel = MainViewModel(ItemRepositoryImpl(apiService))
+        viewModel = MainViewModel(repository)
+        //viewModel = MainViewModel(ItemRepositoryImpl(apiService))
     }
 
     @Test
@@ -64,7 +65,7 @@ class MainViewModelTest {
             Item(6, 2, "Item D")
         )
 
-        whenever(apiService.getItems()).thenReturn(mockItems)
+        whenever(repository.getItems()).thenReturn(mockItems)
         viewModel.fetchItems()
         advanceUntilIdle()
         val uiState = viewModel.uiState.value
@@ -90,7 +91,7 @@ class MainViewModelTest {
     fun `fetchItems shows error when API call fails`() = runTest {
         val errorMessage = "Network error"
 
-        whenever(apiService.getItems()).thenThrow(RuntimeException(errorMessage))
+        whenever(repository.getItems()).thenThrow(RuntimeException(errorMessage))
         viewModel.fetchItems()
         advanceUntilIdle()
         val uiState = viewModel.uiState.value
@@ -98,17 +99,6 @@ class MainViewModelTest {
         assertFalse(uiState.isLoading)
         assertTrue(uiState.error?.contains(errorMessage) == true)
         assertEquals(emptyMap<Int, List<Item>>(), uiState.groupedItems)
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Test
-    fun `fetchItems shows loading state during API call`() = runTest {
-        doAnswer {
-            runBlocking {
-                delay(100)
-                emptyList<Item>()
-            }
-        }.`when`(repository).getItems()
     }
 }
 

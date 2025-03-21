@@ -8,8 +8,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
 import com.example.fetchtakehomechallenge.data.Item
@@ -36,12 +38,27 @@ class MainScreenTest {
             )
         }
 
+        composeRule.onNodeWithTag("mainBoxContainer").assertExists()
         composeRule.onNodeWithText("List ID:", substring = true).assertDoesNotExist()
         composeRule.onNodeWithText("No items found").assertDoesNotExist()
     }
 
     @Test
-    fun mainScreenDisplaysItems_whenDataIsAvailable() {
+    fun mainScreen_displaysErrorMessage_whenErrorOccurs() {
+        composeRule.setContent {
+            TestMainScreen(
+                uiState = ItemsUiState(
+                    error = "An error occured",
+                    isLoading = false
+                )
+            )
+        }
+
+        composeRule.onNodeWithText("No items found").assertIsDisplayed()
+    }
+
+    @Test
+    fun mainScreen_DisplaysItemsList_whenDataIsAvailable() {
         val testItems = mapOf(
             1 to listOf(
                 Item(1, 2, "Item A"),
@@ -114,7 +131,7 @@ class MainScreenTest {
     @Composable
     private fun TestMainScreen(uiState: ItemsUiState) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().testTag("mainBoxContainer")
         ) {
             when {
                 uiState.isLoading && uiState.groupedItems.isEmpty() -> {

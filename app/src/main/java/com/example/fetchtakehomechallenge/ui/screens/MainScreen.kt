@@ -22,12 +22,13 @@ import com.example.fetchtakehomechallenge.data.Item
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import com.example.fetchtakehomechallenge.ui.viewmodel.MainViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(viewModel: MainViewModel = viewModel()) {
     val uiState by viewModel.uiState
@@ -38,7 +39,8 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
 
     SwipeRefresh(
         state = swipeRefreshState,
-        onRefresh = { viewModel.fetchItems() }
+        onRefresh = { viewModel.fetchItems() },
+        modifier = Modifier.semantics { contentDescription = "Swipe to refresh" }
     ) {
         Box(
             modifier = Modifier.fillMaxSize()
@@ -123,5 +125,3 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
             }
         }
     }
-
-
